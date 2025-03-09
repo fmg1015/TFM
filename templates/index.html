@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificación de Imágenes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Clasificación de Imágenes con Flask y TensorFlow</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" id="file-input" name="file" accept="image/*">
+        <button type="submit">Clasificar</button>
+    </form>
+    <div id="resultado"></div>
+
+    <script>
+        document.getElementById("upload-form").onsubmit = async function(event) {
+            event.preventDefault();
+            let formData = new FormData();
+            formData.append("file", document.getElementById("file-input").files[0]);
+
+            let response = await fetch("/predict", {
+                method: "POST",
+                body: formData
+            });
+
+            let result = await response.json();
+            document.getElementById("resultado").innerText = "Predicción: " + result.clase_predicha;
+        };
+    </script>
+</body>
+</html>
