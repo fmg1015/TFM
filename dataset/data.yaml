@@ -1,0 +1,13 @@
+train: C:/Users/ferna/Documents/TFM/dataset/images/train
+val: C:/Users/ferna/Documents/TFM/dataset/images/val
+test: C:/Users/ferna/Documents/TFM/dataset/images/test
+
+nc: 21
+names: ['1-egg', 'american-foulbrood', 'bee-larvae', 'capped-brood-cells', 'capped-drone-cells', 'chalk-brood', 'drone-bee', 'empty-cells', 'multiple-eggs', 'nectar', 'nosema', 'pollen', 'queen-bee', 'queen-cell', 'small-hive-beetle', 'swarm cells', 'varroa-mites', 'wax-moth-larva', 'wax-moth-larva-presence', 'wax-sealed-honey-cells', 'worker-bee']
+
+roboflow:
+  workspace: anannya-c7n8q
+  project: segmentation-rps03
+  version: 6
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/anannya-c7n8q/segmentation-rps03/dataset/6
