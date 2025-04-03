@@ -3,31 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clasificación de Imágenes</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Predicción con YOLOv5</title>
 </head>
 <body>
-    <h1>Clasificación de Imágenes con Flask y TensorFlow</h1>
-    <form id="upload-form" enctype="multipart/form-data">
-        <input type="file" id="file-input" name="file" accept="image/*">
-        <button type="submit">Clasificar</button>
+    <h1>Sube una imagen para la predicción con YOLOv5</h1>
+    <form action="/predict" method="POST" enctype="multipart/form-data">
+        <!-- El campo 'file' es el nombre que Flask espera para el archivo -->
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Realizar Predicción</button>
     </form>
-    <div id="resultado"></div>
+
+    <h2>Resultado de la predicción:</h2>
+    <div id="prediction-result"></div>
 
     <script>
-        document.getElementById("upload-form").onsubmit = async function(event) {
-            event.preventDefault();
-            let formData = new FormData();
-            formData.append("file", document.getElementById("file-input").files[0]);
-
-            let response = await fetch("/predict", {
-                method: "POST",
-                body: formData
-            });
-
-            let result = await response.json();
-            document.getElementById("resultado").innerText = "Predicción: " + result.clase_predicha;
-        };
+        // Puedes agregar aquí código para manejar la respuesta de la predicción en el frontend si lo deseas.
+        // Esto es útil si quieres mostrar los resultados sin tener que recargar la página.
     </script>
 </body>
 </html>
