@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detector Colmena</title>
+</head>
+<body>
+    <h2>Detector de Clases de Colmena</h2>
+    <form action="/predict" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Detectar</button>
+    </form>
+
+    {% if error %}
+      <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    {% if result %}
+        <h3>Clases detectadas:</h3>
+        <ol>
+        {% for name, count in result.items() %}
+            <li style="color: {{ color_map.get(name, '#000') }};">
+            {{ name }}: {{ count }}
+            </li>
+        {% endfor %}
+        </ol>
+    {% endif %}
+{% if img_path and orig_path %}
+    <h4>Imagen original:</h4>
+    <img src="{{ url_for('static', filename=orig_path) }}" style="max-width: 600px; border:1px solid #ccc;"><br><br>
+
+    <h4>Resultado de la detección:</h4>
+    <img src="{{ url_for('static', filename=img_path) }}" style="max-width: 600px; border:1px solid #ccc;">
+{% endif %}
+</body>
+</html>
+
+
+
+
