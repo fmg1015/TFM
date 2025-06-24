@@ -10,7 +10,7 @@ UPLOAD_FOLDER = 'static'
 MODEL_PATH = 'modelo_colmena_transfer.h5'
 CLASSES = ['empty-cells', 'nectar', 'pollen', 'wax-sealed-honey-cells']
 IMG_SIZE = (128, 128)
-BLOCK_SIZE = 18
+BLOCK_SIZE = 50
 STRIDE = 18
 THRESHOLD = 0.5
 MAX_WIDTH = 600
@@ -100,7 +100,7 @@ def predict():
         for (x1, y1, x2, y2) in merged_boxes:
             overlay = output_image.copy()
             cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)  # Relleno
-            alpha = 0.4  # 40% opacidad
+            alpha = 0.1  # 40% opacidad
             output_image = cv2.addWeighted(overlay, alpha, output_image, 1 - alpha, 0)
            
     cv2.imwrite(result_path, output_image)
