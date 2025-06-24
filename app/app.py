@@ -7,8 +7,8 @@ from collections import Counter, defaultdict
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'static'
-MODEL_PATH = 'modelo_colmena_5clases.h5'
-CLASSES = ['drone-bee', 'empty-cells', 'nectar', 'wax-sealed-honey-cells', 'worker-bee']
+MODEL_PATH = 'modelo_colmena_transfer.h5'
+CLASSES = ['empty-cells', 'nectar', 'pollen', 'wax-sealed-honey-cells']
 IMG_SIZE = (128, 128)
 BLOCK_SIZE = 18
 STRIDE = 18
@@ -17,11 +17,10 @@ MAX_WIDTH = 600
 
 # Colores BGR por clase
 CLASS_COLORS = {
-    'drone-bee': (0, 0, 255),
-    'empty-cells': (0, 255, 0),
-    'nectar': (255, 0, 0),
-    'wax-sealed-honey-cells': (0, 255, 255),
-    'worker-bee': (255, 0, 255)
+    'empty-cells': (0, 0, 255),
+    'nectar': (0, 255, 0),
+    'pollen': (255, 0, 0),
+    'wax-sealed-honey-cells': (255, 0, 255)
 }
 
 # Cargar modelo
@@ -101,7 +100,7 @@ def predict():
         for (x1, y1, x2, y2) in merged_boxes:
             overlay = output_image.copy()
             cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)  # Relleno
-            alpha = 0.5  # 10% opacidad
+            alpha = 0.4  # 40% opacidad
             output_image = cv2.addWeighted(overlay, alpha, output_image, 1 - alpha, 0)
            
     cv2.imwrite(result_path, output_image)

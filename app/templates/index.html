@@ -16,13 +16,11 @@
 
     {% if result %}
         <h3>Clases detectadas:</h3>
-        <ol>
-        {% for name, count in result.items() %}
-            <li style="color: {{ color_map.get(name, '#000') }};">
-            {{ name }}: {{ count }}
-            </li>
-        {% endfor %}
-        </ol>
+        <ul>
+          {% for label, count in result.items() %}
+            <li><b>{{ label }}:</b> {{ count }} veces</li>
+          {% endfor %}
+        </ul>
     {% endif %}
 {% if img_path and orig_path %}
     <h4>Imagen original:</h4>
