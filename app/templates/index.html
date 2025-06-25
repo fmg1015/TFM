@@ -13,21 +13,27 @@
     {% if error %}
       <p style="color:red;">{{ error }}</p>
     {% endif %}
+<h3>Distribución por clase:</h3>
+<ul style="list-style: none; padding: 0;">
+  {% for name, color in color_map.items() %}
+    <li style="margin: 4px 0;">
+      <span style="display:inline-block; width: 16px; height: 16px; background-color: {{ color }}; margin-right: 8px;"></span>
+      <b>{{ name }}</b>
+      {% if porcentajes and name in porcentajes %}
+        : {{ porcentajes[name] }}%
+      {% else %}
+        : 0%
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
 
-    {% if result %}
-        <h3>Clases detectadas:</h3>
-        <ul>
-          {% for label, count in result.items() %}
-            <li><b>{{ label }}:</b> {{ count }} veces</li>
-          {% endfor %}
-        </ul>
-    {% endif %}
 {% if img_path and orig_path %}
+    <h4>Resultado de la detección:</h4>
+    <img src="{{ url_for('static', filename=img_path) }}" style="max-width: 600px; border:1px solid #ccc;">
     <h4>Imagen original:</h4>
     <img src="{{ url_for('static', filename=orig_path) }}" style="max-width: 600px; border:1px solid #ccc;"><br><br>
 
-    <h4>Resultado de la detección:</h4>
-    <img src="{{ url_for('static', filename=img_path) }}" style="max-width: 600px; border:1px solid #ccc;">
 {% endif %}
 </body>
 </html>

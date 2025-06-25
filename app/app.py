@@ -10,11 +10,19 @@ UPLOAD_FOLDER = 'static'
 MODEL_PATH = 'modelo_colmena_transfer.h5'
 CLASSES = ['empty-cells', 'nectar', 'pollen', 'wax-sealed-honey-cells']
 IMG_SIZE = (128, 128)
-BLOCK_SIZE = 50
-STRIDE = 18
+BLOCK_SIZE = 35
+STRIDE = 35
 THRESHOLD = 0.5
 MAX_WIDTH = 600
+area_por_clase = defaultdict(int)
 
+
+TRADUCCIONES = {
+    'empty-cells': 'Celdas vacías',
+    'pollen': 'Polen',
+    'nectar': 'Néctar',
+    'wax-sealed-honey-cells': 'Celdas selladas con miel'
+}
 # Colores BGR por clase
 CLASS_COLORS = {
     'empty-cells': (0, 0, 255),
@@ -51,9 +59,9 @@ def merge_boxes(boxes, proximity=10):
 
     return merged
 
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html", color_map={})  # ✅ PASAR color_map vacío
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -92,6 +100,7 @@ def predict():
                 if prob > THRESHOLD:
                     class_name = CLASSES[i]
                     counter[class_name] += 1
+                    area_por_clase[class_name] += BLOCK_SIZE * BLOCK_SIZE
                     detections_by_class[class_name].append((x, y, x + BLOCK_SIZE, y + BLOCK_SIZE))
 
     for class_name, box_list in detections_by_class.items():
@@ -100,7 +109,7 @@ def predict():
         for (x1, y1, x2, y2) in merged_boxes:
             overlay = output_image.copy()
             cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)  # Relleno
-            alpha = 0.1  # 40% opacidad
+            alpha = 0.4  # 40% opacidad
             output_image = cv2.addWeighted(overlay, alpha, output_image, 1 - alpha, 0)
            
     cv2.imwrite(result_path, output_image)
@@ -110,12 +119,16 @@ def predict():
         return '#{:02x}{:02x}{:02x}'.format(bgr[2], bgr[1], bgr[0])
 
     color_map = {name: bgr_to_hex(CLASS_COLORS[name]) for name in CLASSES}
-
-    return render_template('index.html',
-                        result=dict(counter),
-                        img_path='result.jpg',
-                        orig_path='input.jpg',
-                        color_map=color_map)
+    total_image_area = image.shape[0] * image.shape[1]
+    porcentajes = {
+        k: round((v / total_image_area) * 100, 2) for k, v in area_por_clase.items()
+    }
+    return render_template("index.html",
+                       img_path='result.jpg',
+                       orig_path='input.jpg',
+                       color_map={TRADUCCIONES.get(k, k): v for k, v in color_map.items()},
+                       result={TRADUCCIONES.get(k, k): v for k, v in counter.items()},
+                       porcentajes={TRADUCCIONES.get(k, k): v for k, v in porcentajes.items()})
 
 if __name__ == '__main__':
     app.run(debug=True)
