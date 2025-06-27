@@ -2,88 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Detector de Colmena</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f7f7f7;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h2 {
-            color: #4a90e2;
-        }
-
-        form {
-            margin-bottom: 20px;
-        }
-
-        input[type="file"] {
-            margin-right: 10px;
-        }
-
-        button {
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        button:hover {
-            background-color: #357abd;
-        }
-
-        .legend {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 6px;
-            max-width: 400px;
-            margin-bottom: 20px;
-        }
-
-        .legend ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .legend li {
-            margin: 6px 0;
-            display: flex;
-            align-items: center;
-        }
-
-        .color-box {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            margin-right: 8px;
-            border-radius: 4px;
-            border: 1px solid #aaa;
-        }
-
-        .image-box {
-            margin-bottom: 30px;
-        }
-
-        img {
-            max-width: 100%;
-            border: 1px solid #ccc;
-            margin-top: 5px;
-        }
-
-        .error {
-            color: red;
-            font-weight: bold;
-        }
-    </style>
+    <title>Monitor de colmenas AI</title>
+   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>Detector de Clases de Colmena</h2>
+    <h2>Monitor de colmenas AI</h2>
 
     <form action="/predict" method="post" enctype="multipart/form-data">
         <input type="file" name="file" required>
@@ -95,7 +18,7 @@
     {% endif %}
 
     <div class="legend">
-        <h3>Distribución por clase</h3>
+        <h3>Resultados por clase</h3>
         <ul>
         {% for name, color in color_map.items() %}
             <li>
