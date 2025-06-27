@@ -14,8 +14,6 @@ BLOCK_SIZE = 35
 STRIDE = 35
 THRESHOLD = 0.5
 MAX_WIDTH = 600
-area_por_clase = defaultdict(int)
-
 
 TRADUCCIONES = {
     'empty-cells': 'Celdas vacías',
@@ -23,7 +21,7 @@ TRADUCCIONES = {
     'nectar': 'Néctar',
     'wax-sealed-honey-cells': 'Celdas selladas con miel'
 }
-# Colores BGR por clase
+
 CLASS_COLORS = {
     'empty-cells': (0, 0, 255),
     'nectar': (0, 255, 0),
@@ -31,7 +29,6 @@ CLASS_COLORS = {
     'wax-sealed-honey-cells': (255, 0, 255)
 }
 
-# Cargar modelo
 model = tf.keras.models.load_model(MODEL_PATH)
 
 def merge_boxes(boxes, proximity=10):
@@ -61,13 +58,13 @@ def merge_boxes(boxes, proximity=10):
 
 @app.route("/")
 def index():
-    return render_template("index.html", color_map={})  # ✅ PASAR color_map vacío
+    return render_template("index.html", color_map={})
 
 @app.route('/predict', methods=['POST'])
 def predict():
     file = request.files['file']
     if not file:
-        return render_template('index.html', result={}, error="No file uploaded")
+        return render_template('index.html', result={}, error="No file uploaded", color_map={})
 
     input_path = os.path.join(UPLOAD_FOLDER, 'input.jpg')
     result_path = os.path.join(UPLOAD_FOLDER, 'result.jpg')
@@ -75,7 +72,7 @@ def predict():
 
     image = cv2.imread(input_path)
     if image is None:
-        return render_template('index.html', result={}, error="No se pudo leer la imagen")
+        return render_template('index.html', result={}, error="No se pudo leer la imagen", color_map={})
 
     h, w = image.shape[:2]
     if w > MAX_WIDTH:
@@ -86,6 +83,7 @@ def predict():
     output_image = image.copy()
     counter = Counter()
     detections_by_class = defaultdict(list)
+    area_por_clase = defaultdict(int)
 
     for y in range(0, image_height - BLOCK_SIZE + 1, STRIDE):
         for x in range(0, image_width - BLOCK_SIZE + 1, STRIDE):
@@ -95,40 +93,46 @@ def predict():
             block_input = np.expand_dims(block_input, axis=0)
 
             predictions = model.predict(block_input, verbose=0)[0]
+            class_index = np.argmax(predictions)
+            prob = predictions[class_index]
 
-            for i, prob in enumerate(predictions):
-                if prob > THRESHOLD:
-                    class_name = CLASSES[i]
-                    counter[class_name] += 1
-                    area_por_clase[class_name] += BLOCK_SIZE * BLOCK_SIZE
-                    detections_by_class[class_name].append((x, y, x + BLOCK_SIZE, y + BLOCK_SIZE))
+            if prob > THRESHOLD:
+                class_name = CLASSES[class_index]
+                counter[class_name] += 1
+                area_por_clase[class_name] += BLOCK_SIZE * BLOCK_SIZE
+                detections_by_class[class_name].append((x, y, x + BLOCK_SIZE, y + BLOCK_SIZE))
 
     for class_name, box_list in detections_by_class.items():
         color = CLASS_COLORS.get(class_name, (0, 0, 0))
         merged_boxes = merge_boxes(box_list, proximity=10)
         for (x1, y1, x2, y2) in merged_boxes:
             overlay = output_image.copy()
-            cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)  # Relleno
-            alpha = 0.4  # 40% opacidad
+            cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)
+            alpha = 0.4
             output_image = cv2.addWeighted(overlay, alpha, output_image, 1 - alpha, 0)
-           
+
     cv2.imwrite(result_path, output_image)
 
-    # Convertir colores BGR a HEX para HTML
     def bgr_to_hex(bgr):
         return '#{:02x}{:02x}{:02x}'.format(bgr[2], bgr[1], bgr[0])
 
-    color_map = {name: bgr_to_hex(CLASS_COLORS[name]) for name in CLASSES}
+    color_map = {TRADUCCIONES.get(k, k): bgr_to_hex(CLASS_COLORS[k]) for k in CLASSES}
     total_image_area = image.shape[0] * image.shape[1]
+    total_detected_area = sum(area_por_clase.values())
+    factor = min(1.0, total_image_area / total_detected_area) if total_detected_area > 0 else 1.0
+
     porcentajes = {
-        k: round((v / total_image_area) * 100, 2) for k, v in area_por_clase.items()
+        TRADUCCIONES.get(k, k): round((v * factor / total_image_area) * 100, 2)
+        for k, v in area_por_clase.items()
     }
+
     return render_template("index.html",
-                       img_path='result.jpg',
-                       orig_path='input.jpg',
-                       color_map={TRADUCCIONES.get(k, k): v for k, v in color_map.items()},
-                       result={TRADUCCIONES.get(k, k): v for k, v in counter.items()},
-                       porcentajes={TRADUCCIONES.get(k, k): v for k, v in porcentajes.items()})
+                           img_path='result.jpg',
+                           orig_path='input.jpg',
+                           color_map=color_map,
+                           result={TRADUCCIONES.get(k, k): v for k, v in counter.items()},
+                           porcentajes=porcentajes)
 
 if __name__ == '__main__':
     app.run(debug=True)
+
