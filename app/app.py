@@ -10,8 +10,8 @@ UPLOAD_FOLDER = 'static'
 MODEL_PATH = 'modelo_colmena_transfer.h5'
 CLASSES = ['empty-cells', 'nectar', 'pollen', 'wax-sealed-honey-cells']
 IMG_SIZE = (128, 128)
-BLOCK_SIZE = 35
-STRIDE = 35
+BLOCK_SIZE = 32
+STRIDE = 32
 THRESHOLD = 0.5
 MAX_WIDTH = 600
 
